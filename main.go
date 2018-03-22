@@ -3,10 +3,15 @@ import (
   "fmt"
   "net/http"
   "time"
+  "regexp"
 )
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-    // remove/add not default ports from req.Host
+    matched, _ := regexp.MatchString("[0-9]+.[0-9]+.[0-9]+.[0-9]+", req.Host)
+    if matched == true {
+      w.WriteHeader(404)
+      return
+    }
     target := "https://" + req.Host + req.URL.Path
     if len(req.URL.RawQuery) > 0 {
         target += "?" + req.URL.RawQuery
