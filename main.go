@@ -1,26 +1,31 @@
 package main
+
 import (
-  "net/http"
-  "regexp"
+	"net/http"
+	"regexp"
 )
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-    matched, _ := regexp.MatchString("[0-9]+.[0-9]+.[0-9]+.[0-9]+", req.Host)
-    if matched == true {
-      w.WriteHeader(404)
-      return
-    }
-    target := "https://" + req.Host + req.URL.Path
-    if len(req.URL.RawQuery) > 0 {
-        target += "?" + req.URL.RawQuery
-    }
-    http.Redirect(w, req, target,
-            http.StatusMovedPermanently)
+	matched, _ := regexp.MatchString("[0-9]+.[0-9]+.[0-9]+.[0-9]+", req.Host)
+	if matched {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 not found !"))
+		return
+	}
+	// HSTS is a HTTP header that instructs the browser to change all http:// requests to https://.
+	w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 }
 
 func main() {
-  http.HandleFunc("/", redirect)
-  if err := http.ListenAndServe(":8080", nil); err != nil {
-    panic(err)
-  }
+	handler := http.NewServeMux()
+	handler.HandleFunc("/", redirect)
+
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: handler,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		panic(err)
+	}
 }
