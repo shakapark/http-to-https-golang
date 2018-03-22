@@ -1,6 +1,8 @@
 package main
 import (
+  "fmt"
   "net/http"
+  "time"
 )
 
 func redirect(w http.ResponseWriter, req *http.Request) {
@@ -14,6 +16,19 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+  started := time.Now()
+
+  http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+    duration := time.Now().Sub(started)
+    if duration.Seconds() > 10 {
+      w.WriteHeader(500)
+      w.Write([]byte(fmt.Sprintf("error: %v", duration.Seconds())))
+    } else {
+      w.WriteHeader(200)
+     w.Write([]byte("ok"))
+    }
+  })
+
   http.HandleFunc("/", redirect)
   if err := http.ListenAndServe(":8080", nil); err != nil {
     panic(err)
