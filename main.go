@@ -16,17 +16,17 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 }
 
-func healthz(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-	w.Write([]byte("ok"))
-}
+//func healthz(w http.ResponseWriter, r *http.Request) {
+//	w.WriteHeader(200)
+//	w.Write([]byte("ok"))
+//}
 
 func main() {
 	handler := http.NewServeMux()
 
 	handler.HandleFunc("/", redirect)
 
-	handler.HandleFunc("/healthz", healthz)
+//	handler.HandleFunc("/healthz", healthz)
 
 	server := http.Server{
 		Addr:    ":8080",
