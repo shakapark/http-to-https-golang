@@ -13,7 +13,12 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// HSTS is a HTTP header that instructs the browser to change all http:// requests to https://.
-	w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+//	w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+	target := "https://" + req.Host + req.URL.Path
+	if len(req.URL.RawQuery) > 0 {
+		target += "?" + req.URL.RawQuery
+	}
+	http.Redirect(w, req, target, http.StatusMovedPermanently)
 }
 
 //func healthz(w http.ResponseWriter, r *http.Request) {
