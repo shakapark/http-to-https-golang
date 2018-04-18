@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 	"regexp"
 )
 
@@ -18,22 +16,17 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 }
 
+func healthz(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	w.Write([]byte("ok"))
+}
+
 func main() {
 	handler := http.NewServeMux()
-	started := time.Now()
-
-	handler.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		duration := time.Now().Sub(started)
-		if duration.Seconds() > 10 {
-			w.WriteHeader(500)
-			w.Write([]byte(fmt.Sprintf("error: %v", duration.Seconds())))
-		} else {
-			w.WriteHeader(200)
-			w.Write([]byte("ok"))
-		}
-	})
 
 	handler.HandleFunc("/", redirect)
+
+	handler.HandleFunc("/healthz", healthz)
 
 	server := http.Server{
 		Addr:    ":8080",
